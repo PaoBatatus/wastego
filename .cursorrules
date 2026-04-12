@@ -1,0 +1,37 @@
+# WasteGo — Regras do Projeto para o Cursor
+
+## Projeto
+Plataforma de Gestão Inteligente de Resíduos para Santa Helena, PR
+UTFPR Câmpus Santa Helena — PI2 2026
+
+## Stack
+- Backend: PHP 8.2+ com Laravel 11
+- Frontend: React 18 + Vite + Tailwind CSS
+- Banco de Dados: MySQL 8.0
+- Autenticação: Laravel Sanctum (tokens)
+- Mapas: Google Maps API
+- Notificações: Firebase Cloud Messaging
+- PDFs: Laravel DomPDF
+
+## Estrutura de Pastas
+- /backend  → projeto Laravel
+- /frontend → projeto React + Vite
+
+## Perfis de Usuário
+- cidadao: acesso a anúncios, denúncias, mapa, moeda verde
+- empresa: acesso a anúncios de lote, certificados CDF
+- cooperativa: acesso ao mural de ofertas e mapa de resíduos
+- gestor: acesso ao dashboard municipal e gestão de denúncias
+
+## Padrões de Código
+- Idioma: português para nomes de variáveis, métodos e comentários
+- API: RESTful com prefixo /api/v1/
+- Respostas JSON: sempre com campos 'success', 'data' e 'message'
+- Validações: sempre usar Form Request do Laravel
+- Frontend: componentes funcionais com hooks, sem classes
+- Tailwind: mobile-first, sem CSS customizado quando possível
+
+## Segurança
+- Sempre usar middleware de autenticação nas rotas protegidas
+- Verificar perfil do usuário antes de qualquer operação sensível
+- Nunca retornar senhas ou tokens em responses
