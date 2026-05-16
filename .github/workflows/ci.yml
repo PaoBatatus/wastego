@@ -1,18 +1,58 @@
 name: WasteGo CI
 on: [push, pull_request]
+
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: wastego_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+          extensions: pdo_mysql, mysqli, fileinfo, zip
+
       - name: Install dependencies
-        run: cd backend && composer install
+        run: cd backend && composer install --no-interaction
+
+      - name: Copy .env
+        run: cd backend && cp .env.example .env
+
+      - name: Configure .env for CI
+        run: |
+          cd backend
+          sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/' .env
+          sed -i 's/# DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/# DB_PORT=3306/DB_PORT=3306/' .env
+          sed -i 's/# DB_DATABASE=Laravel/DB_DATABASE=wastego_test/' .env
+          sed -i 's/# DB_USERNAME=root/DB_USERNAME=root/' .env
+          sed -i 's/# DB_PASSWORD=/DB_PASSWORD=secret/' .env
+
+      - name: Generate key
+        run: cd backend && php artisan key:generate
+
+      - name: Run migrations
+        run: cd backend && php artisan migrate --force
+
       - name: Run tests
         run: cd backend && php artisan test
+
   frontend-lint:
     runs-on: ubuntu-latest
     steps:
