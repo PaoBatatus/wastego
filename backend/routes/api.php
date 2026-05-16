@@ -22,14 +22,15 @@ Route::prefix('v1')->group(function (): void {
 
     Route::prefix('residuos')->group(function (): void {
         Route::get('/', [ResiduoController::class, 'index']);
-        Route::get('/{id}', [ResiduoController::class, 'show']);
-    });
 
-    Route::prefix('residuos')->middleware('auth:sanctum')->group(function (): void {
-        Route::post('/', [ResiduoController::class, 'store']);
-        Route::put('/{id}', [ResiduoController::class, 'update']);
-        Route::delete('/{id}', [ResiduoController::class, 'destroy']);
-        Route::get('/meus', [ResiduoController::class, 'meus']);
+        Route::middleware('auth:sanctum')->group(function (): void {
+            Route::get('/meus', [ResiduoController::class, 'meus']);
+            Route::post('/', [ResiduoController::class, 'store']);
+            Route::put('/{id}', [ResiduoController::class, 'update']);
+            Route::delete('/{id}', [ResiduoController::class, 'destroy']);
+        });
+
+        Route::get('/{id}', [ResiduoController::class, 'show']);
     });
 
     Route::prefix('denuncias')->middleware('auth:sanctum')->group(function (): void {

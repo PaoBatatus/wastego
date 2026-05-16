@@ -61,18 +61,21 @@ class AuthController extends Controller
         }
 
         $token = $usuario->createToken('auth_token')->plainTextToken;
-        $data = [
-            'usuario' => $usuario,
-            'token' => $token,
-        ];
-
-        if ($usuario->isPerfil('empresa') || $usuario->isPerfil('cooperativa')) {
-            $data['nome_empresa'] = $usuario->nome_empresa;
-        }
 
         return response()->json([
             'success' => true,
-            'data' => $data,
+            'data' => [
+                'usuario' => [
+                    'id' => $usuario->id,
+                    'name' => $usuario->name,
+                    'email' => $usuario->email,
+                    'perfil' => $usuario->perfil,
+                    'nome_empresa' => $usuario->nome_empresa,
+                    'telefone' => $usuario->telefone,
+                    'ativo' => $usuario->ativo,
+                ],
+                'token' => $token,
+            ],
             'message' => 'Login realizado com sucesso.',
         ]);
     }

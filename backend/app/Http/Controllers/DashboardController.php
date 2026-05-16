@@ -30,8 +30,8 @@ class DashboardController extends Controller
             ->pluck('total', 'perfil');
 
         $data = [
-            'total_residuos_anunciados' => DB::table('anuncios')->count(),
-            'total_coletado' => DB::table('anuncios')->where('status', 'concluido')->count(),
+            'total_residuos_anunciados' => DB::table('residuos')->count(),
+            'total_coletado' => DB::table('residuos')->where('status', 'coletado')->count(),
             'denuncias_por_status' => $denunciasPorStatus,
             'usuarios_por_perfil' => $usuariosPorPerfil,
             'total_certificados_emitidos' => Certificado::query()->count(),
