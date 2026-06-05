@@ -1,0 +1,50 @@
+services:
+  # Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: wastego-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: secret_password
+      MYSQL_DATABASE: wastego
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # Backend (PHP 8.4 + Extensões para o Laravel)
+  backend:
+    image: chialab/php:8.4-fpm
+    container_name: wastego-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    depends_on:
+      - db
+    command: tail -f /dev/null
+
+  # Frontend (React Native + Expo)
+  # AVISO: O container do frontend web antigo foi comentado. 
+  # Para testar no celular via Expo Go, é fortemente recomendado rodar o frontend 
+  # diretamente na sua máquina host (fora do Docker) usando `npx expo start` dentro da pasta `frontend/`.
+  #
+  # frontend:
+  #   image: node:lts-alpine
+  #   container_name: wastego-frontend
+  #   working_dir: /app
+  #   ports:
+  #     - "8081:8081"
+  #   volumes:
+  #     - ./frontend:/app
+  #   command: sh -c "npm install && npx expo start"
+  #   depends_on:
+  #     - backend
+
+volumes:
+  mysql_data:
+
+# ativar o sevidor depois com:
+# docker exec -d wastego-backend php artisan serve --host=0.0.0.0 --port=8000
