@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider, useTheme } from '../context/theme-context';
+import { LocationProvider } from '../context/LocationContext';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 function LayoutContent() {
@@ -20,9 +21,11 @@ export default function Layout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <AuthProvider>
-          <LayoutContent />
-        </AuthProvider>
+        <LocationProvider>
+          <AuthProvider>
+            <LayoutContent />
+          </AuthProvider>
+        </LocationProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

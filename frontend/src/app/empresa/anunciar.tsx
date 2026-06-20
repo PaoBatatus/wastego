@@ -5,7 +5,7 @@ import AlertBox from '../../components/alert-box';
 import Button from '../../components/button';
 import { useTheme } from '../../context/theme-context';
 import api from '../../services/api';
-import * as Location from 'expo-location';
+import { useLocationConfirmation } from '../../context/LocationContext';
 
 type WasteCategory = 'plastico' | 'papel' | 'vidro' | 'metal' | 'eletronico' | 'organico' | 'entulho' | '';
 
@@ -21,6 +21,7 @@ const CATEGORIAS = [
 
 export default function AnunciarLoteScreen() {
     const { colors } = useTheme();
+    const { requestConfirmedLocation } = useLocationConfirmation();
 
     const [categoria, setCategoria] = useState<WasteCategory>('plastico');
     const [descricao, setDescricao] = useState('');
@@ -66,16 +67,11 @@ export default function AnunciarLoteScreen() {
 
     const capturarLocalizacao = async () => {
         try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setError('Permissão de localização negada.');
-                return;
-            }
-            let location = await Location.getCurrentPositionAsync({});
+            let location = await requestConfirmedLocation();
             setLocalizacao({ lat: location.coords.latitude, lng: location.coords.longitude });
             setError('');
-        } catch (err) {
-            setError('Falha ao obter localização.');
+        } catch (err: any) {
+            setError(err.message || 'Falha ao obter localização.');
         }
     };
 

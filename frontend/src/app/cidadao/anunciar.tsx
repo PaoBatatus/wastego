@@ -8,7 +8,7 @@ import api from '../../services/api';
 
 type WasteCategory = 'plastico' | 'papel' | 'vidro' | 'metal' | 'eletronico' | 'organico' | 'entulho' | '';
 
-import * as Location from 'expo-location';
+import { useLocationConfirmation } from '../../context/LocationContext';
 
 const CATEGORIAS = [
     { value: 'plastico', label: 'Plástico' },
@@ -22,6 +22,7 @@ const CATEGORIAS = [
 
 export default function AnunciarScreen() {
     const { colors } = useTheme();
+    const { requestConfirmedLocation } = useLocationConfirmation();
 
     const [categoria, setCategoria] = useState<WasteCategory>('plastico');
     const [descricao, setDescricao] = useState('');
@@ -38,16 +39,11 @@ export default function AnunciarScreen() {
 
     const capturarLocalizacao = async () => {
         try {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setError('Permissão de localização negada.');
-                return;
-            }
-            let location = await Location.getCurrentPositionAsync({});
+            let location = await requestConfirmedLocation();
             setLocalizacao({ lat: location.coords.latitude, lng: location.coords.longitude });
             setError('');
-        } catch (err) {
-            setError('Falha ao obter localização.');
+        } catch (err: any) {
+            setError(err.message || 'Falha ao obter localização.');
         }
     };
 
