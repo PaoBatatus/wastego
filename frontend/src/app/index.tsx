@@ -7,12 +7,16 @@ import { useTheme } from '../context/theme-context';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginScreen() {
-    const { colors } = useTheme();
+    const { colors, scheme } = useTheme();
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const utfprLogoSource = scheme === 'dark'
+        ? require('../../assets/utfpr/logo-utfpr-negativa.png')
+        : require('../../assets/utfpr/logo-utfpr.png');
 
     const handleLogin = async () => {
         if (!email.trim() || !password) {
@@ -52,6 +56,11 @@ export default function LoginScreen() {
                 <Text style={[styles.subtitle, {color: colors.textMuted}]}>
                     Conectando cidadãos, empresas, governo e cooperativas.
                 </Text>
+                <View style={[styles.freeBadge, { backgroundColor: colors.primary + '20' }]}>
+                    <Text style={[styles.freeBadgeText, { color: colors.primary }]}>
+                        Aplicativo 100% Gratuito
+                    </Text>
+                </View>
             </View>
 
             <View style={styles.form}>
@@ -81,6 +90,14 @@ export default function LoginScreen() {
                     variant='ghost'
                     style={{marginTop: 10}}
                 />
+                <View style={styles.partnerContainer}>
+                    <Text style={[styles.partnerText, {color: colors.textMuted}]}>Apoio Institucional</Text>
+                    <Image 
+                        source={utfprLogoSource} 
+                        style={styles.partnerLogo}
+                        resizeMode="contain"
+                    />
+                </View>
             </View>
         </View>
     );
@@ -92,6 +109,11 @@ const styles = StyleSheet.create({
     logo: { width: 80, height: 80, marginBottom: 8 },
     title: { fontSize: 32, fontWeight: '700', letterSpacing: -1 },
     subtitle: { fontSize: 14, textAlign: 'center' },
+    freeBadge: { marginTop: 12, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
+    freeBadgeText: { fontSize: 12, fontWeight: '600' },
     form: { flex: 1, justifyContent: 'center' },
     cta: { paddingBottom: 16 },
+    partnerContainer: { alignItems: 'center', marginTop: 24 },
+    partnerText: { fontSize: 12, marginBottom: 8 },
+    partnerLogo: { height: 40, width: 120 },
 });
