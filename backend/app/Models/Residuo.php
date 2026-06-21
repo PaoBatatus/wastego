@@ -16,12 +16,9 @@ class Residuo extends Model
         'categoria',
         'descricao',
         'foto_url',
-        'peso_estimado',
         'latitude',
         'longitude',
         'status',
-        'janela_inicio',
-        'janela_fim',
     ];
 
     public function user(): BelongsTo
