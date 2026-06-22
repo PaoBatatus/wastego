@@ -26,7 +26,7 @@ class StoreDenunciaRequest extends FormRequest
         return [
             'categoria' => ['required', Rule::in(['descarte_irregular', 'lixo_via_publica', 'entulho', 'poda_fora_calendario', 'outro'])],
             'descricao' => ['required', 'string', 'max:1000'],
-            'foto_url' => ['nullable', 'string', 'url'],
+            'foto' => ['required', 'image', 'max:5120'], // Max 5MB
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
         ];
@@ -40,8 +40,9 @@ class StoreDenunciaRequest extends FormRequest
             'descricao.required' => 'A descrição é obrigatória.',
             'descricao.string' => 'A descrição deve ser um texto.',
             'descricao.max' => 'A descrição deve ter no máximo 1000 caracteres.',
-            'foto_url.string' => 'A URL da foto deve ser um texto.',
-            'foto_url.url' => 'A URL da foto deve ser válida.',
+            'foto.required' => 'A foto é obrigatória.',
+            'foto.image' => 'O arquivo deve ser uma imagem.',
+            'foto.max' => 'A foto não pode ter mais que 5MB.',
             'latitude.required' => 'A latitude é obrigatória.',
             'latitude.numeric' => 'A latitude deve ser numérica.',
             'latitude.between' => 'A latitude deve estar entre -90 e 90.',

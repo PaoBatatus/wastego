@@ -45,14 +45,6 @@ export default function MuralScreen() {
                 {CATEGORIAS.find(c => c.value === item.categoria)?.label || item.categoria}
             </Text>
             <Text style={{ fontSize: 14, color: colors.text, marginTop: 4 }}>{item.descricao}</Text>
-            <Text style={{ fontSize: 13, color: colors.text, marginTop: 8 }}>
-                Peso: <Text style={{ fontWeight: 'bold' }}>{item.peso_estimado != null ? Number(item.peso_estimado) + ' kg' : '—'}</Text>
-            </Text>
-            {(item.janela_inicio || item.janela_fim) && (
-                <Text style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>
-                    Retirada: {item.janela_inicio ? new Date(item.janela_inicio).toLocaleString() : 'Livre'} até {item.janela_fim ? new Date(item.janela_fim).toLocaleString() : 'Livre'}
-                </Text>
-            )}
         </View>
     );
 
@@ -98,12 +90,7 @@ export default function MuralScreen() {
                             <Callout>
                                 <View style={{ width: 180 }}>
                                     <Text style={{ fontWeight: 'bold' }}>{CATEGORIAS.find(c => c.value === r.categoria)?.label}</Text>
-                                    <Text>{r.peso_estimado} kg</Text>
-                                    {(r.janela_inicio || r.janela_fim) && (
-                                        <Text style={{ fontSize: 10, color: '#666', marginTop: 2 }}>
-                                            {r.janela_inicio ? String(r.janela_inicio).substring(0, 10) : 'Livre'} a {r.janela_fim ? String(r.janela_fim).substring(0, 10) : 'Livre'}
-                                        </Text>
-                                    )}
+                                    <Text style={{ fontSize: 12, marginTop: 2 }}>{r.descricao}</Text>
                                 </View>
                             </Callout>
                         </Marker>

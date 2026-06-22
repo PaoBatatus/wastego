@@ -45,7 +45,8 @@ class DenunciaController extends Controller
         $denuncia->user_id = $request->user()->id;
         $denuncia->categoria = $dados['categoria'];
         $denuncia->descricao = $dados['descricao'];
-        $denuncia->foto_url = $dados['foto_url'] ?? null;
+        $path = $request->file('foto')->store('denuncias', 'public');
+        $denuncia->foto_url = '/storage/' . $path;
         $denuncia->latitude = $dados['latitude'];
         $denuncia->longitude = $dados['longitude'];
         $denuncia->status = 'recebida';

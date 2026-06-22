@@ -65,8 +65,13 @@ class ResiduoController extends Controller
             ], 403);
         }
 
+        $validated = $request->validated();
+        $path = $request->file('foto')->store('residuos', 'public');
+        $validated['foto_url'] = '/storage/' . $path;
+        unset($validated['foto']);
+
         $residuo = Residuo::create([
-            ...$request->validated(),
+            ...$validated,
             'user_id' => $usuario->id,
             'status' => 'disponivel',
         ]);
@@ -120,14 +125,17 @@ class ResiduoController extends Controller
         $dados = $request->validate([
             'categoria' => ['sometimes', Rule::in(['plastico', 'papel', 'vidro', 'metal', 'eletronico', 'organico', 'entulho'])],
             'descricao' => ['sometimes', 'string', 'max:1000'],
-            'foto_url' => ['sometimes', 'nullable', 'string', 'url'],
-            'peso_estimado' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+            'foto' => ['sometimes', 'image', 'max:5120'],
             'latitude' => ['sometimes', 'numeric', 'between:-90,90'],
             'longitude' => ['sometimes', 'numeric', 'between:-180,180'],
-            'janela_inicio' => ['sometimes', 'nullable', 'date', 'after:now'],
-            'janela_fim' => ['sometimes', 'nullable', 'date', 'after:janela_inicio'],
             'status' => ['sometimes', 'string', 'max:50'],
         ]);
+
+        if ($request->hasFile('foto')) {
+            $path = $request->file('foto')->store('residuos', 'public');
+            $dados['foto_url'] = '/storage/' . $path;
+            unset($dados['foto']);
+        }
 
         $residuo->update($dados);
 

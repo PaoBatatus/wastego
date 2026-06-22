@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, Image } from 'react-native';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import AlertBox from '../../components/alert-box';
 import Button from '../../components/button';
 import { useTheme } from '../../context/theme-context';
@@ -25,10 +26,7 @@ export default function AnunciarLoteScreen() {
 
     const [categoria, setCategoria] = useState<WasteCategory>('plastico');
     const [descricao, setDescricao] = useState('');
-    const [pesoEstimado, setPesoEstimado] = useState('');
-    const [janelaInicio, setJanelaInicio] = useState('');
-    const [janelaFim, setJanelaFim] = useState('');
-    const [localizacao, setLocalizacao] = useState<{lat: number, lng: number} | null>(null);
+    const [foto, setFoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     const [lotes, setLotes] = useState<any[]>([]);
@@ -65,42 +63,61 @@ export default function AnunciarLoteScreen() {
         return () => { isMounted = false; };
     }, []);
 
-    const capturarLocalizacao = async () => {
-        try {
-            let location = await requestConfirmedLocation();
-            setLocalizacao({ lat: location.coords.latitude, lng: location.coords.longitude });
+    const tirarFoto = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            setError('Precisamos da permissão da câmera para tirar a foto.');
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 0.8,
+        });
+        if (!result.canceled) {
+            setFoto(result.assets[0]);
             setError('');
-        } catch (err: any) {
-            setError(err.message || 'Falha ao obter localização.');
         }
     };
 
     const handleSubmit = async () => {
         if (!descricao.trim()) { setError('Preencha a descrição.'); return; }
-        if (!pesoEstimado) { setError('Informe o peso estimado.'); return; }
-        if (!localizacao) { setError('Capture sua localização antes de anunciar.'); return; }
+        if (!foto) { setError('A foto é obrigatória.'); return; }
 
         setError('');
         setLoading(true);
         try {
-            const pesoConvertido = pesoEstimado ? Number(pesoEstimado.replace(',', '.')) : NaN;
-            const payload: any = {
-                categoria,
-                descricao: descricao.trim(),
-                latitude: localizacao.lat,
-                longitude: localizacao.lng,
-                ...(!isNaN(pesoConvertido) ? { peso_estimado: pesoConvertido } : {})
-            };
-            if (janelaInicio) payload.janela_inicio = janelaInicio;
-            if (janelaFim) payload.janela_fim = janelaFim;
+            let location;
+            try {
+                location = await requestConfirmedLocation();
+            } catch (err: any) {
+                setError(err.message || 'Confirmação de localização cancelada ou falhou.');
+                setLoading(false);
+                return;
+            }
 
-            await api.post('/residuos', payload);
+            const formData = new FormData();
+            formData.append('categoria', categoria);
+            formData.append('descricao', descricao.trim());
+            formData.append('latitude', String(location.coords.latitude));
+            formData.append('longitude', String(location.coords.longitude));
+
+            const filename = foto.uri.split('/').pop() || 'foto.jpg';
+            const match = /\.(\w+)$/.exec(filename);
+            const type = match ? `image/${match[1]}` : `image`;
+
+            formData.append('foto', {
+                uri: foto.uri,
+                name: filename,
+                type,
+            } as any);
+
+            await api.post('/residuos', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             setShowSuccessAlert(true);
             setDescricao('');
-            setPesoEstimado('');
-            setJanelaInicio('');
-            setJanelaFim('');
-            setLocalizacao(null);
+            setFoto(null);
             carregarLotes();
         } catch (err: any) {
             let errorMsg = 'Erro ao criar anúncio de lote.';
@@ -161,46 +178,24 @@ export default function AnunciarLoteScreen() {
                     style={[styles.textarea, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
                 />
 
-                <Text style={[styles.label, { color: colors.textMuted }]}>PESO ESTIMADO (KG) *</Text>
-                <TextInput
-                    value={pesoEstimado}
-                    onChangeText={setPesoEstimado}
-                    keyboardType="numeric"
-                    placeholder="Ex: 50.5"
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                />
-
-                <Text style={[styles.label, { color: colors.textMuted }]}>JANELA DE RETIRADA (INÍCIO) - OPCIONAL</Text>
-                <TextInput
-                    value={janelaInicio}
-                    onChangeText={setJanelaInicio}
-                    placeholder="Ex: 2026-05-30T10:00"
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                />
-
-                <Text style={[styles.label, { color: colors.textMuted }]}>JANELA DE RETIRADA (FIM) - OPCIONAL</Text>
-                <TextInput
-                    value={janelaFim}
-                    onChangeText={setJanelaFim}
-                    placeholder="Ex: 2026-05-30T18:00"
-                    placeholderTextColor={colors.textMuted}
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                />
-
-                <Text style={[styles.label, { color: colors.textMuted }]}>LOCALIZAÇÃO</Text>
+                <Text style={[styles.label, { color: colors.textMuted }]}>FOTO DO LOTE *</Text>
                 <Pressable
-                    onPress={capturarLocalizacao}
+                    onPress={tirarFoto}
                     style={({ pressed }) => [
                         styles.photoPressable,
-                        { borderColor: '#2563eb', backgroundColor: pressed ? '#eff6ff' : 'transparent' }
+                        { borderColor: '#2563eb', backgroundColor: pressed ? '#eff6ff' : 'transparent', marginBottom: 12, overflow: 'hidden' }
                     ]}
                 >
-                    <Text style={styles.photoIcon}>📍</Text>
-                    <Text style={[styles.photoLabel, { color: '#2563eb' }]}>
-                        {localizacao ? 'Localização Capturada' : 'Capturar Localização'}
-                    </Text>
+                    {foto ? (
+                        <Image source={{ uri: foto.uri }} style={{ width: '100%', height: 150, borderRadius: 8 }} resizeMode="cover" />
+                    ) : (
+                        <>
+                            <Text style={styles.photoIcon}>📷</Text>
+                            <Text style={[styles.photoLabel, { color: '#2563eb' }]}>
+                                Tirar Foto
+                            </Text>
+                        </>
+                    )}
                 </Pressable>
 
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -229,7 +224,7 @@ export default function AnunciarLoteScreen() {
                                     {item.status.toUpperCase()}
                                 </Text>
                             </View>
-                            <Text style={{ fontSize: 13, color: colors.text, marginBottom: 4 }}>{Number(item.peso_estimado)} kg</Text>
+
                             <Text style={{ fontSize: 12, color: colors.textMuted }}>{new Date(item.created_at).toLocaleDateString()}</Text>
                         </View>
                     ))

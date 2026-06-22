@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 
 export const TOKEN_KEY = 'wastego_token';
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.33.29:8000/api/v1';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.33.10:8000/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
