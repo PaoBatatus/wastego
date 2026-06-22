@@ -60,8 +60,8 @@ class ResiduoTest extends TestCase
             'peso_estimado' => 3.50,
             'latitude' => -23.5505200,
             'longitude' => -46.6333080,
+            'foto' => \Illuminate\Http\UploadedFile::fake()->image('foto.jpg'),
         ]);
-
         $response->assertStatus(201)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.categoria', 'vidro');
