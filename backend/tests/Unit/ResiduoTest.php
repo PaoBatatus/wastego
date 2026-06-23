@@ -53,15 +53,15 @@ class ResiduoTest extends TestCase
         $usuario = User::factory()->create(['perfil' => 'cidadao']);
         Sanctum::actingAs($usuario);
 
-        $response = $this->postJson('/api/v1/residuos', [
+        $response = $this->post('/api/v1/residuos', [
             'categoria' => 'vidro',
             'descricao' => 'Garrafas para coleta',
-            'foto_url' => 'https://example.com/foto.jpg',
             'peso_estimado' => 3.50,
             'latitude' => -23.5505200,
             'longitude' => -46.6333080,
             'foto' => \Illuminate\Http\UploadedFile::fake()->image('foto.jpg'),
-        ]);
+        ], ['Accept' => 'application/json']);
+        
         $response->assertStatus(201)
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.categoria', 'vidro');
